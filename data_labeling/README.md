@@ -1,7 +1,8 @@
-# Unsuperviseed_SQuAD_Dataset_AutoLabeler
+# Data labeling for SQuAD format dataset
 
+## 1. Supervised labeler
+## 2. Unsupervised labeler
 ### powered by gpt api and spacy
-
 ### beta 1:
 - initialized system pipeline
 ### beta 2 (11/21/2023 updated):
