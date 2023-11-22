@@ -1,6 +1,6 @@
 # Podcast_QA_Assistant
 
-
+This is the final project for EECS 6893 Big Data Analytics
 
 
 ## Author
