@@ -51,7 +51,7 @@ def chunk_folder(dir_path, output_path, method=SPACY, chunk_size=20):
 
 if __name__ == '__main__':
     # chunk_size, method, dir_path, output_path, to_chunk  = sys.argv[1:]
-    chunk_size, method, dir_path, output_path, to_chunk = 20, SPACY, './input/', './chunked_out/', FOLDER
+    chunk_size, method, dir_path, output_path, to_chunk = 20, SPACY, './input', './chunked_out', FOLDER
     if to_chunk == FOLDER:
         chunk_folder(dir_path, output_path, method, chunk_size)
     else:
