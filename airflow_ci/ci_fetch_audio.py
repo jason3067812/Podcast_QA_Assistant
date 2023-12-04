@@ -20,7 +20,7 @@ def fetch_audio_urls(podcast_name, podcast_id):
     episode_lst = response_json['episodes']
 
     audio_lst = []
-    audio_ep_num_lst = [] # this part is empty TODO
+    audio_ep_num_lst = []
     for i in range(len(episode_lst)):
         title = episode_lst[i]['title']
         audio_url = episode_lst[i]['audio']

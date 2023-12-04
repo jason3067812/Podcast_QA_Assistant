@@ -7,13 +7,7 @@ from ci_constants import *
 import string
 import sys
 
-# The DAG object; we'll need this to instantiate a DAG
-from airflow import DAG
-
 # Operators; we need this to operate!
-from airflow.operators.bash import BashOperator
-# from airflow.operators.python import PythonOperator
-# from airflow.operators.dummy import DummyOperator
 from airflow.providers.google.cloud.transfers.local_to_gcs import LocalFilesystemToGCSOperator
 
 

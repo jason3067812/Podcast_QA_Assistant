@@ -27,38 +27,6 @@ def get_file_path(chunk_id):
     return os.path.join(DATA_DIR, filename)
 
 
-def _make_task_id_for_gsc(podcast_name, i):
-    return '{}_{}'.format(podcast_name, i)
-    # ep = ep.replace(' ', '_').replace(':', '-').replace("'", '')
-    # ep = ep.translate(str.maketrans('', '', string.punctuation))
-    # return ep
-
-
-# def move_to_cloud_storage_2(podcast_name):
-#     global added
-#     bucket_name = 'base_data_podcaster'
-#     with open(DATA_DIR + str(podcast_name) + '_episode_keys.pkl', 'rb') as f:
-#         episodes = pickle.load(f)
-
-#     # Upload each transcribed file to GCS
-#     upload_audio_id_files = []
-#     for i, ep in enumerate(episodes):
-#         f = '{}.txt'.format(_make_task_id_for_gsc(podcast_name, i))
-#         local_file_path = os.path.join(TRANSCRIBE_DIR, podcast_name, f)
-#         gcs_file_path = "{}/{}".format(podcast_name, f)
-#         task_idd = 'upload_to_gcs_{}'.format(f)
-#         if task_idd in added:
-#             continue
-#         else:
-#             upload_task = LocalFilesystemToGCSOperator(
-#                 task_id=task_idd,
-#                 src=local_file_path,
-#                 dst=gcs_file_path,
-#                 bucket=bucket_name,
-#             )
-#             upload_audio_id_files.append(upload_task)
-#             added.add(task_idd)
-#     return upload_audio_id_files
 
 ############################################
 # DEFINE AIRFLOW DAG (SETTINGS + SCHEDULE)
@@ -110,18 +78,12 @@ with DAG(
             retries=3
         ) for podcast_name in PODCAST_ID_DIR.keys()
     ]
-    # save_beyond_the_screenplay = move_to_cloud_storage_2('beyond_the_screenplay')
-    
-
     
 
 ##########################################
 # DEFINE TASKS HIERARCHY
 ##########################################
-    # for i in range(NUM_CHUNKS):
     fetch_audio >> transcribe_audio >> move_to_cloud_storage
-    #  >> [ move_to_cloud_storage_2(i) for i in PODCAST_ID_DIR.keys() ] #[save_beyond_the_screenplay]
 
-# TODO: either get sensor working or maybe try movign gcs into python operator (just move it to a new file and then call it)
 
 
