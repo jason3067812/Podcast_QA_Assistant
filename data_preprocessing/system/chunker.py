@@ -26,7 +26,7 @@ def chunker(data, chunk_size, method):
     
     return chunks, len(chunks)
 
-def _save_chunked_file(chunk, filename, output_path):
+def _save_chunked_file(chunk, filename, output_path, i):
     output_filename = output_path + "/" + filename
     with open(output_filename, 'w', encoding='utf-8') as file:
         file.write(chunk)
@@ -39,7 +39,7 @@ def chunk_file(file_path, output_path, method=SPACY, chunk_size=20):
     chunks, chuncks_length = chunker(content, chunk_size, method)
     for i, chunk in enumerate(chunks):
         filename = f"{file_name_without_extension}_chunk_{i + 1}.txt"
-        _save_chunked_file(chunk, filename, output_path)
+        _save_chunked_file(chunk, filename, output_path, i)
 
 
 
