@@ -10,7 +10,6 @@ import sys
 # Operators; we need this to operate!
 from airflow.providers.google.cloud.transfers.local_to_gcs import LocalFilesystemToGCSOperator
 
-
 ####################################################
 # DEFINE PYTHON FUNCTIONS
 ####################################################
@@ -21,42 +20,74 @@ def get_file_path(chunk_id):
     return os.path.join(DATA_DIR, filename)
 
 
-def _make_task_id_for_gsc(podcast_name, i):
-    return '{}_{}'.format(podcast_name, i)
-
-def _get_transcribe_task(fname):
-    with open(DATA_DIR + fname, 'rb') as f:
-        task = pickle.load(f)
-    return task
+def _make_task_id_for_gsc_lst(item_moving_to_gcs, podcast_name):
+    return 'upload_{}_to_gcs_{}'.format(item_moving_to_gcs, podcast_name)
 
 
-def move_to_cloud_storage(podcast_name, fname):
+# def _get_transcribe_task(fname):
+#     with open(DATA_DIR + fname, 'rb') as f:
+#         task = pickle.load(f)
+#     return task
+
+
+
+def _move_to_cloud_storage_helper(podcast_name, local_dir, item_moving_to_gcs, external_sensor):
     global added
     bucket_name = 'base_data_podcaster'
-    with open(DATA_DIR + str(podcast_name) + '_episode_keys.pkl', 'rb') as f:
-        episodes = pickle.load(f)
-
+    
     # Upload each transcribed file to GCS
-    upload_audio_id_files = []
-    for i, ep in enumerate(episodes):
-        f = '{}.txt'.format(_make_task_id_for_gsc(podcast_name, i))
-        fname = '{}.txt'.format(ep)
-        local_file_path = os.path.join(TRANSCRIBE_DIR, podcast_name, fname)
-        gcs_file_path = "{}/{}".format(podcast_name, fname)
-        task_idd = 'upload_to_gcs_{}'.format(f)
-        if task_idd in added:
-            continue
-        else:
-            upload_task = LocalFilesystemToGCSOperator(
-                task_id=task_idd,
-                src=local_file_path,
-                dst=gcs_file_path,
-                bucket=bucket_name,
-            )
-            upload_task.set_upstream(_get_transcribe_task(fname))
-            upload_audio_id_files.append(upload_task)
-            added.add(task_idd)
-    return upload_audio_id_files
+    local_file_path_lst = []
+    gcs_file_path_lst = []
+    task_idd = _make_task_id_for_gsc_lst(item_moving_to_gcs, podcast_name)
+    for root, dirs, files in os.walk(local_dir, podcast_name):
+        for i, filename in enumerate(files):
+            local_file_path = os.path.join(root, filename)
+            local_file_path_lst.append(local_file_path)
+            gcs_file_path = "{}/{}/{}".format(item_moving_to_gcs, podcast_name, filename)
+            gcs_file_path_lst.append(gcs_file_path)
+    
+    gcs_file_path = "/{}/{}/".format(item_moving_to_gcs, podcast_name)
+    print('gcs_file_path', gcs_file_path)
+    upload_task = LocalFilesystemToGCSOperator(
+        task_id=task_idd,
+        src=local_file_path_lst,
+        dst=gcs_file_path,
+        bucket=bucket_name,
+    )
+    upload_task.set_upstream(external_sensor)
+    return upload_task
+
+
+def _move_full_transcripts_to_cloud_storage(podcast_name, external_sensor):
+    local_dir = TRANSCRIBE_DIR
+    item_moving_to_gcs = 'full'
+    return _move_to_cloud_storage_helper(podcast_name, local_dir, item_moving_to_gcs, external_sensor)
+
+
+def _move_chunked_transcripts_to_cloud_storage(podcast_name, external_sensor):
+    local_dir = CHUNK_DIR
+    item_moving_to_gcs = 'chunked'
+    return _move_to_cloud_storage_helper(podcast_name, local_dir, item_moving_to_gcs, external_sensor)
+
+
+def _move_embedded_transcripts_to_cloud_storage(podcast_name, external_sensor):
+    local_dir = EMBEDDED_DIR
+    item_moving_to_gcs = 'embedded'
+    return _move_to_cloud_storage_helper(podcast_name, local_dir, item_moving_to_gcs, external_sensor)
+
+
+def move_to_cloud_storage(podcast_name, external_sensor):
+    move_full = _move_full_transcripts_to_cloud_storage(podcast_name, external_sensor)
+    move_chunked = _move_chunked_transcripts_to_cloud_storage(podcast_name, external_sensor)
+    move_embedded = _move_embedded_transcripts_to_cloud_storage(podcast_name, external_sensor)
+    final_tasks = [
+            # move_full,
+            move_chunked,
+            move_embedded,           
+        ]
+
+    return final_tasks
+
 
 if __name__ == '__main__':
     podcast_name = sys.argv[1]
