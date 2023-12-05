@@ -16,6 +16,8 @@ from airflow.operators.bash import BashOperator
 # from airflow.operators.dummy import DummyOperator
 from airflow.providers.google.cloud.transfers.local_to_gcs import LocalFilesystemToGCSOperator
 
+from ci_post_to_gcs import move_to_cloud_storage
+
 
 ####################################################
 # DEFINE PYTHON FUNCTIONS
@@ -68,22 +70,26 @@ with DAG(
             retries=3
         )
     
-    with open(DATA_DIR + 'transcribe_audio_task.pkl', 'wb') as f:
-        pickle.dump(transcribe_audio, f)
+    # with open(DATA_DIR + 'transcribe_audio_task.pkl', 'wb') as f:
+    #     pickle.dump(transcribe_audio, f)
 
-    move_to_cloud_storage = [
-        BashOperator(
-            task_id='move_to_cloud_stoarge_{}'.format(podcast_name),
-            bash_command='python /home/kj2546/airflow/dags/ci_post_to_gcs.py {} {}'.format(podcast_name, 'transcribe_audio_task.pkl'),
-            retries=3
-        ) for podcast_name in PODCAST_ID_DIR.keys()
+    # move_to_cloud_storage = [
+    #     BashOperator(
+    #         task_id='move_to_cloud_stoarge_{}'.format(podcast_name),
+    #         bash_command='python /home/kj2546/airflow/dags/ci_post_to_gcs.py {} {}'.format(podcast_name, 'transcribe_audio_task.pkl'),
+    #         retries=3
+    #     ) for podcast_name in PODCAST_ID_DIR.keys()
+    # ]
+
+    move_to_cloud_storage_lst = [
+        move_to_cloud_storage(podcast_name, 'transcribe_audio_task.pkl', transcribe_audio, 'dag') for podcast_name in PODCAST_ID_DIR.keys()
     ]
     
 
 ##########################################
 # DEFINE TASKS HIERARCHY
 ##########################################
-    fetch_audio >> transcribe_audio >> move_to_cloud_storage
+    fetch_audio >> transcribe_audio #>> move_to_cloud_storage_lst
 
 
 
