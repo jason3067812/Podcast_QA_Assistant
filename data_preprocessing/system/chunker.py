@@ -78,13 +78,9 @@ def embed_folder(dir_path, output_path):
 
 
 if __name__ == '__main__':
-    """
     chunk_size, method, dir_path, output_path, to_chunk  = sys.argv[1:]
     # chunk_size, method, dir_path, output_path, to_chunk = 20, SPACY, './input', './chunked_out', FOLDER
     if to_chunk == FOLDER:
         chunk_folder(dir_path, output_path, method, chunk_size)
     else:
-        chunk_file(dir_path, output_path, method, chunk_size)
-        """
-    embed_folder("C:/Users/唐子尧/Desktop/test", "C:/Users/唐子尧/Desktop/test_1")
-    
+        chunk_file(dir_path, output_path, method, chunk_size)    
