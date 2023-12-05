@@ -30,11 +30,10 @@ def transcribe_and_local_save(podcast_name):
 
     model = whisper.load_model('base')
     for i, audio_url in enumerate(audio_url_lst):
-        # result = model.transcribe(audio_url)
+        # result = model.transcribe(audio_url) # TODO: UNCOMMENT ME
         ep_num = audio_episode_num_lst[i]
         # _save_entire_transcript(result, podcast_name, ep_num)
         _chunk_and_save(podcast_name, ep_num)
-        # embed
         # _embed_and_save(podcast_name, ep_num)
 
 if __name__ == '__main__':

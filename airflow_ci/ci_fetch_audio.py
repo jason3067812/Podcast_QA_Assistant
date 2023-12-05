@@ -11,7 +11,6 @@ def get_all_prior_fetched_set():
 
 def fetch_audio_urls(podcast_name, podcast_id):
     all_fetched_episodse_titles = get_all_prior_fetched_set()
-    # print(all_fetched_episodse_titles)
 
     # TODO: UNCOMMENT ME; STREAMLINING TESTING
     # client = podcast_api.Client(api_key=API_KEY)  
