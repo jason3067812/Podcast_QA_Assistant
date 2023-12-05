@@ -50,48 +50,9 @@ def chunk_folder(dir_path, output_path, method=SPACY, chunk_size=20):
             chunk_file(file_path, output_path, method, chunk_size)
 
 if __name__ == '__main__':
-    # chunk_size, method, dir_path, output_path, to_chunk  = sys.argv[1:]
-    chunk_size, method, dir_path, output_path, to_chunk = 20, SPACY, './input', './chunked_out', FOLDER
+    chunk_size, method, dir_path, output_path, to_chunk  = sys.argv[1:]
+    # chunk_size, method, dir_path, output_path, to_chunk = 20, SPACY, './input', './chunked_out', FOLDER
     if to_chunk == FOLDER:
         chunk_folder(dir_path, output_path, method, chunk_size)
     else:
         chunk_file(dir_path, output_path, method, chunk_size)
-
-
-    # method = sys.argv[2]
-    # dir_path = sys.argv[3]
-
-    # chunk_size = 20
-    # method = "spacy"
-    # directory_path = r"D:\GitHub\Podcast_QA_Assistant\data_preprocessing\system\input"
-    # output_path = r"D:\GitHub\Podcast_QA_Assistant\data_preprocessing\system\output"
-
-    # if not os.path.exists(output_path):
-    #     os.makedirs(output_path)
-
-
-    # for root, dirs, files in os.walk(directory_path):
-    #     for filename in files:
-            
-    #         file_path = os.path.join(root, filename)
-            
-    #         file_name_without_extension, file_extension = os.path.splitext(os.path.basename(file_path))
-            
-            
-    #         with open(file_path, 'r') as file:
-    #             content = file.read()
-    #         chunks, chuncks_length = chunker(content, chunk_size, method)
-    #         for i, chunk in enumerate(chunks):
-    #             filename = f"{file_name_without_extension}_chunk_{i + 1}.txt"
-    #             output_filename = output_path + "/" + filename
-    #             with open(output_filename, 'w', encoding='utf-8') as file:
-    #                 file.write(chunk)
-    #             print(f"Chunk {i + 1} save into {filename}")
-            
-            
-            
-
-
-
-
-
