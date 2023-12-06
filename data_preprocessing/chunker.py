@@ -24,10 +24,7 @@ def chunker_helper(sentences, chunk_size, overlap_size):
 
 
 def chunker(data, chunk_size, overlap_size, method):
-<<<<<<< HEAD
-  
-=======
->>>>>>> d02d26701fbf7bca44b8be71ee1947bc901a62e0
+
     if method == SPACY:
         nlp = spacy.load(SPACY_MODEL)
         doc = nlp(data)
