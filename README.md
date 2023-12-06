@@ -7,7 +7,7 @@ This is the final project for EECS 6893 Big Data Analytics
 - [x] modularize the embeddings 
 - [ ] get top n most similar documents to query
 - [x] prompt engineering for gpt
-- [ ] system file (integration of parts) (majority is there; Ziyao to complete get_top_n_docs)
+- [x] system file (integration of parts) (majority is there; Ziyao to complete get_top_n_docs)
 - [ ] add embedding to airflow pipeline
 - [ ] UI system (make sure to include listennotes logo onto the api)
 - [x] add overlap_size to chunk_file fn
