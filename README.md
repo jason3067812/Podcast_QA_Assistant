@@ -4,7 +4,7 @@ This is the final project for EECS 6893 Big Data Analytics
 
 ## Todos
 - [ ] finish embedding using transformers
-- [ ] modularize the embeddings 
+- [x] modularize the embeddings 
 - [ ] get top n most similar documents to query
 - [ ] prompt engineering for gpt
 - [ ] system file (integration of parts)
