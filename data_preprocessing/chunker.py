@@ -3,6 +3,8 @@ import spacy
 import os
 import sys
 import pickle
+import numpy as np
+
 
 nltk.download('punkt')
 spacy.prefer_gpu()
@@ -65,19 +67,22 @@ def chunk_folder(dir_path, output_path, method=SPACY, chunk_size = 100, overlap_
 
 
 # embeddings below
-def embed(text, nlp):
+def embed(text,nlp):
+    # Process the text
     doc = nlp(text)
-    embedding = doc.vector
-    return embedding
+    return doc._.trf_data.last_hidden_layer_state.data
+    
     
 def embed_file(file_path, output_path):
     file_name_without_extension, file_extension = os.path.splitext(os.path.basename(file_path))
-    nlp = spacy.load('en_core_web_lg')
+    nlp = spacy.load('en_core_web_trf')
 
     with open(file_path, 'r') as file:
         text = file.read()
     
     embedding = embed(text, nlp)
+
+    print(embedding)
 
     # doc = nlp(text)
     # embedding = doc.vector
@@ -95,12 +100,29 @@ def embed_folder(dir_path, output_path):
             file_path = os.path.join(root, filename)
             embed_file(file_path, output_path)
 
+def cosine(u, v):
+    return np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
+
+
+def find_similarity(file_path, query):
+    file_name_without_extension, file_extension = os.path.splitext(os.path.basename(file_path))
+
+    nlp = spacy.load('en_core_web_trf')
+    doc = nlp(query)
+    query_vec = doc.vector
+
+    with open(file_path, 'rb') as file:
+       data = pickle.load(file)
+ 
+    sim = cosine(query_vec, data)
+    print(file_name_without_extension," similarity = ", sim)
+
 
 
 if __name__ == '__main__':
     
     
-    overlap_size, chunk_size, method, dir_path, output_path, to_chunk  = sys.argv[1:]
+    #overlap_size, chunk_size, method, dir_path, output_path, to_chunk  = sys.argv[1:]
     # overlap_size = 50, chunk_size = 100, SPACY, './input', './chunked_out', FOLDER
     
     # overlap_size = 50
@@ -110,8 +132,7 @@ if __name__ == '__main__':
     # dir_path = "D:/GitHub/Podcast_QA_Assistant/full"
     # output_path = "D:/GitHub/Podcast_QA_Assistant/output"
     
-    
     if to_chunk == FOLDER:
         chunk_folder(dir_path, output_path, method, chunk_size, overlap_size)
     else:
-        chunk_file(dir_path, output_path, method, chunk_size, overlap_size)    
+        chunk_file(dir_path, output_path, method, chunk_size, overlap_size)  
