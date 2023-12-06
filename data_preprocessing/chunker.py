@@ -13,8 +13,11 @@ NLTK = 'nltk'
 FOLDER = 'folder'
 FILE = 'file'
 
+def chunker_helper(sentences, chunk_size, overlap_size):
+    pass
 
-def chunker(data, chunk_size, method):
+
+def chunker(data, chunk_size, overlap_size, method):
     if method == SPACY:
         nlp = spacy.load(SPACY_MODEL)
         doc = nlp(data)
@@ -23,7 +26,8 @@ def chunker(data, chunk_size, method):
             sentences.append(sentence.text)
     elif method == NLTK:
         sentences = nltk.sent_tokenize(data)
-    chunks = ['\n'.join(sentences[i:i + chunk_size]) for i in range(0, len(sentences), chunk_size)]
+    chunks = chunker_helper(sentences, chunk_size, overlap_size)
+    # chunks = ['\n'.join(sentences[i:i + chunk_size]) for i in range(0, len(sentences), chunk_size)]
     
     return chunks, len(chunks)
 

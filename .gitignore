@@ -1,2 +1,3 @@
 __pycache__/
-data_preprocessing/system/chunked_out/
+chunked_out/
+input/
