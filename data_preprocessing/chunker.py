@@ -54,7 +54,11 @@ def chunk_folder(dir_path, output_path, method=SPACY, chunk_size=20):
             file_path = os.path.join(root, filename)
             chunk_file(file_path, output_path, method, chunk_size)
 
-
+def embed(text, nlp):
+    doc = nlp(text)
+    embedding = doc.vector
+    return embedding
+    
 
 def embed_file(file_path, output_path):
     file_name_without_extension, file_extension = os.path.splitext(os.path.basename(file_path))
@@ -62,9 +66,11 @@ def embed_file(file_path, output_path):
 
     with open(file_path, 'r') as file:
         text = file.read()
+    
+    embedding = embed(text, nlp)
 
-    doc = nlp(text)
-    embedding = doc.vector
+    # doc = nlp(text)
+    # embedding = doc.vector
 
     filename =  f"{file_name_without_extension}_embedded_.pkl"
     output_filename = output_path + "/" + filename
