@@ -6,11 +6,11 @@ This is the final project for EECS 6893 Big Data Analytics
 - [ ] finish embedding using transformers
 - [x] modularize the embeddings 
 - [ ] get top n most similar documents to query
-- [ ] prompt engineering for gpt
-- [ ] system file (integration of parts)
+- [x] prompt engineering for gpt
+- [ ] system file (integration of parts) (majority is there; Ziyao to complete get_top_n_docs)
 - [ ] add embedding to airflow pipeline
 - [ ] UI system (make sure to include listennotes logo onto the api)
-- [ ] add overlap_size to chunk_file fn
+- [x] add overlap_size to chunk_file fn
 - [ ] run experiments for chunk_size (number of sentences in chunk)
 - [ ] run experiments for overlap_size (how much overlap should there be per chunk)
 - [ ] run epxeriments to find best model (maybe) 
