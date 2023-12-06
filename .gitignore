@@ -2,3 +2,4 @@ __pycache__/
 chunked_out/
 input/
 *.json
+private_consts.py
