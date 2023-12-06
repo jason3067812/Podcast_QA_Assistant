@@ -1,7 +1,10 @@
+import pickle
+import sys
+
 from google.cloud import storage
 # from pydrive.auth import GoogleAuth
 # from pydrive.drive import GoogleDrive
-import pickle
+from openai import OpenAI
 
 from data_preprocessing.chunker import embed
 
@@ -64,10 +67,24 @@ def get_top_n_docs(embedded_query, local_path=''):
         text_lst = []
     return text_lst # in descending order by nature of np.argmax
 
-def pass_to_llm(query, context_lst):
-    # pass to prompt
-    res_of_llm = ''
-    return res_of_llm
+
+def pass_to_llm(context_lst, query):
+    api_key = ""
+    client = OpenAI(api_key=api_key)
+    model_id = "gpt-3.5-turbo-1106"
+
+    # print("input prompt: ")
+    prompt = f"According to the following information: {context_lst}\nAnswer the following question: {query}"
+    # print(prompt)
+    messages = [
+            {"role": "user", "content": prompt}
+        ]
+    completion = client.chat.completions.create(
+    model=model_id,
+    messages=messages,
+    )
+    response = completion.choices[0].message.content
+    return response
 
 
 
@@ -78,23 +95,14 @@ def main(query):
     # top n docs based on query
     context_lst = get_top_n_docs(embedded_query)
 
-    # pass query and chunked docs to llm fn
-    answer = pass_to_llm(query, context_lst)
+    # pass query and chunked docs to llm fn - done / Eric's is integrated
+    answer = pass_to_llm(context_lst, query)
 
     # return output
     return answer
 
 if __name__ == "__main__":
-    # vector_lst, fname_lst_pkl = fetch_pkl_content_from_gcs()
-    # print(vector_lst)
-    # print(fname_lst_pkl)
-    # text_lst_all, fname_lst_txt_all = fetch_txt_content_from_gcs()
-    # print(text_lst_all)
-    # print(fname_lst_txt_all)
-    text_lst_1, fname_lst_txt_1 = fetch_txt_content_from_gcs(['1'])
-    foo = text_lst_1[:5]
-    for i in foo:
-        print(i)
-    # print(text_lst_1)
-    # print(fname_lst_txt_1)
+    query = sys.argv[1]
+    answer = main(query)
+    print(answer)
 
