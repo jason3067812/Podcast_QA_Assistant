@@ -18,12 +18,13 @@ def chunker_helper(sentences, chunk_size, overlap_size):
     chunks = []
     for i in range(0, len(sentences), chunk_size - overlap_size):
         chunk = sentences[i:i + chunk_size]
-        chunks.append(chunk)
+        concatenated_chunk = '\n'.join(chunk)  # Concatenate with '\n' separator
+        chunks.append(concatenated_chunk)
     return chunks
 
 
 def chunker(data, chunk_size, overlap_size, method):
-    
+  
     if method == SPACY:
         nlp = spacy.load(SPACY_MODEL)
         doc = nlp(data)
@@ -49,9 +50,10 @@ def _save_chunked_file(chunk, filename, output_path, i):
 def chunk_file(file_path, output_path, method=SPACY, chunk_size = 100, overlap_size = 50):
     
     file_name_without_extension, file_extension = os.path.splitext(os.path.basename(file_path))
-    with open(file_path, 'r') as file:
+    print(file_path)
+    with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read()
-    chunks, chuncks_length = chunker(content, chunk_size, method, overlap_size)
+    chunks, chuncks_length = chunker(content, chunk_size, overlap_size, method)
     for i, chunk in enumerate(chunks):
         filename = f"{file_name_without_extension}_chunk_{i + 1}.txt"
         _save_chunked_file(chunk, filename, output_path, i)
@@ -94,8 +96,18 @@ def embed_folder(dir_path, output_path):
 
 if __name__ == '__main__':
     
+    
     overlap_size, chunk_size, method, dir_path, output_path, to_chunk  = sys.argv[1:]
-    # chunk_size, method, dir_path, output_path, to_chunk = 20, SPACY, './input', './chunked_out', FOLDER
+    # overlap_size = 50, chunk_size = 100, SPACY, './input', './chunked_out', FOLDER
+    
+    # overlap_size = 50
+    # chunk_size = 100
+    # method = SPACY
+    # to_chunk = FOLDER
+    # dir_path = "D:/GitHub/Podcast_QA_Assistant/full"
+    # output_path = "D:/GitHub/Podcast_QA_Assistant/output"
+    
+    
     if to_chunk == FOLDER:
         chunk_folder(dir_path, output_path, method, chunk_size, overlap_size)
     else:
