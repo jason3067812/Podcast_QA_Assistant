@@ -105,6 +105,15 @@ def find_similarity(embed_query, embed_doc):
     sim = cos_sim(embed_query, embed_doc).item()
     return sim
 
+    similarities.sort(key=lambda x: x[1], reverse=True)
+    filenames, sim_scores = zip(*similarities[:n])
+
+    print(filenames)
+    print(sim_scores)
+
+    return list(sim_scores), list(filenames)
+
+   
 
 
 if __name__ == '__main__':
