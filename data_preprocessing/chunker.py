@@ -4,7 +4,7 @@ import os
 import sys
 import pickle
 import numpy as np
-
+from sentence_transformers import SentenceTransformer, util
 
 nltk.download('punkt')
 spacy.prefer_gpu()
@@ -71,8 +71,12 @@ def embed(text,nlp):
     # Process the text
     doc = nlp(text)
     return doc._.trf_data.last_hidden_layer_state.data
-    
-    
+
+def embed2(text):
+    model = SentenceTransformer('multi-qa-MiniLM-L6-cos-v1')
+    return(model.encode(text))
+
+       
 def embed_file(file_path, output_path):
     file_name_without_extension, file_extension = os.path.splitext(os.path.basename(file_path))
     nlp = spacy.load('en_core_web_trf')
@@ -80,12 +84,9 @@ def embed_file(file_path, output_path):
     with open(file_path, 'r') as file:
         text = file.read()
     
-    embedding = embed(text, nlp)
+    #embedding = embed(text, nlp)
 
-    print(embedding)
-
-    # doc = nlp(text)
-    # embedding = doc.vector
+    embedding = embed2(text)
 
     filename =  f"{file_name_without_extension}_embedded_.pkl"
     output_filename = output_path + "/" + filename
@@ -100,23 +101,32 @@ def embed_folder(dir_path, output_path):
             file_path = os.path.join(root, filename)
             embed_file(file_path, output_path)
 
-def cosine(u, v):
-    return np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
 
+# Return n similarity and file names (list)
+def find_most_n_similar(n, query, dir_path):
+    model = SentenceTransformer('multi-qa-MiniLM-L6-cos-v1') 
+    query_embedding = model.encode(query)  
+    similarities = []
 
-def find_similarity(file_path, query):
-    file_name_without_extension, file_extension = os.path.splitext(os.path.basename(file_path))
+    for root, dirs, files in os.walk(dir_path):
+        for filename in files:
+            file_path = os.path.join(root, filename)
 
-    nlp = spacy.load('en_core_web_trf')
-    doc = nlp(query)
-    query_vec = doc.vector
+            with open(file_path, 'rb') as file:
+              passage_embedding = pickle.load(file)
+              similarity = util.dot_score(query_embedding, passage_embedding)
 
-    with open(file_path, 'rb') as file:
-       data = pickle.load(file)
- 
-    sim = cosine(query_vec, data)
-    print(file_name_without_extension," similarity = ", sim)
+              similarities.append((filename, similarity)) 
 
+    similarities.sort(key=lambda x: x[1], reverse=True)
+    filenames, sim_scores = zip(*similarities[:n])
+
+    print(filenames)
+    print(sim_scores)
+
+    return list(sim_scores), list(filenames)
+
+   
 
 
 if __name__ == '__main__':
@@ -135,4 +145,5 @@ if __name__ == '__main__':
     if to_chunk == FOLDER:
         chunk_folder(dir_path, output_path, method, chunk_size, overlap_size)
     else:
-        chunk_file(dir_path, output_path, method, chunk_size, overlap_size)  
+        chunk_file(dir_path, output_path, method, chunk_size, overlap_size)    
+ 
