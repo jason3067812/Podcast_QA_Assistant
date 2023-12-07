@@ -1,12 +1,13 @@
 import pickle
 import sys
+import numpy as np
 
 from google.cloud import storage
 # from pydrive.auth import GoogleAuth
 # from pydrive.drive import GoogleDrive
 from openai import OpenAI
 
-from data_preprocessing.chunker import embed
+from data_preprocessing.chunker import embed, find_similarity
 
 BUCKET_NAME = 'base_data_podcaster'
 CHUNKED_FOLDER = 'chunked/' + 'beyond_the_screenplay/' # TODO: REMOVE this extra beyond_the_screenplay once collapse all files into top level folder
@@ -48,16 +49,21 @@ def fetch_txt_content_from_gcs(lst_to_return=None):
                 text_lst.append(text)
     return text_lst, fname_lst
 
-# skeleton starter code to show example of how to use above functions to read in data from gcs
-# feel free to change function header as needed
-def get_top_n_docs(embedded_query, local_path=''):
+
+def get_top_n_docs(embedded_query, n, local_path=''):
     if len(local_path) == 0:
         embedded_docs, fname_lst = fetch_pkl_content_from_gcs()
     else:
         # get the files of embeddings from your local comp stored at local_path
         embedded_docs = []
         fname_lst = []
+    
     # calc cosine distance
+    similarity_scores = []
+    for embed_doc in embedded_docs:
+        similarity_scores.append(find_similarity(embedded_query, embed_doc))
+    idx_of_top_n_docs = np.argsort(similarity_scores)[::-1][:n]
+  
     # get top index of top n embedded docs (np.argmax probably)
     fname_of_chunks_to_fetch = fname_lst[idx_of_top_n_docs]
     if len(local_path) == 0:
@@ -73,9 +79,7 @@ def pass_to_llm(context_lst, query):
     client = OpenAI(api_key=api_key)
     model_id = "gpt-3.5-turbo-1106"
 
-    # print("input prompt: ")
     prompt = f"According to the following information: {context_lst}\nAnswer the following question: {query}"
-    # print(prompt)
     messages = [
             {"role": "user", "content": prompt}
         ]
@@ -88,12 +92,12 @@ def pass_to_llm(context_lst, query):
 
 
 
-def main(query):
+def main(query, n=3):
     # embed query
     embedded_query = embed(query) 
 
     # top n docs based on query
-    context_lst = get_top_n_docs(embedded_query)
+    context_lst = get_top_n_docs(embedded_query, n)
 
     # pass query and chunked docs to llm fn - done / Eric's is integrated
     answer = pass_to_llm(context_lst, query)
@@ -102,7 +106,10 @@ def main(query):
     return answer
 
 if __name__ == "__main__":
+    n = 3
     query = sys.argv[1]
+    if len(sys.argv) == 3:
+        n = sys.argv[2]
     answer = main(query)
     print(answer)
 
