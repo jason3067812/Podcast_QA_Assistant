@@ -3,6 +3,7 @@ numpy
 spacy
 sentence-transformers
 # python -m spacy download en_core_web_sm
+# python -m spacy download en_core_web_lg
 # python -m spacy download en_core_web_trf
 # python -m spacy download all-MiniLM-L6-v2
 # pydrive
