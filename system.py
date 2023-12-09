@@ -99,13 +99,9 @@ def fetch_txt_content_from_local_folder(local_folder_path, lst_to_return=None):
 
 
 def get_top_n_docs(embedded_query, n, local_folder_path=""):
-    
-    
-    print("get_top_n_docs")
     if len(local_folder_path) == 0:
         embedded_docs, fname_lst = fetch_pkl_content_from_gcs()
     else:
-        # get the files of embeddings from your local comp stored at local_path
         embedded_docs, fname_lst = fetch_pkl_content_from_local_folder(local_folder_path)
     
     # calc cosine distance
@@ -113,55 +109,34 @@ def get_top_n_docs(embedded_query, n, local_folder_path=""):
     for embed_doc in embedded_docs:
         similarity_scores.append(find_similarity(embedded_query, embed_doc))
     idx_of_top_n_docs = np.argsort(similarity_scores)[::-1][:n]
-    
-    
-    print(idx_of_top_n_docs)
-    
-    
-    # get top index of top n embedded docs (np.argmax probably)
     fname_of_chunks_to_fetch = [ fname_lst[x].replace('_embedded_.pkl', '') for x in idx_of_top_n_docs]
-    
-    print(fname_of_chunks_to_fetch)  
-  
-    
+
     if len(local_folder_path) == 0:
         text_lst, _ = fetch_txt_content_from_gcs(fname_of_chunks_to_fetch)
     else:
-        # get the text of the files from your local comp stored at local path
         text_lst, _ = fetch_txt_content_from_local_folder(local_folder_path, lst_to_return=fname_of_chunks_to_fetch)
         
-        
-    return text_lst # in descending order by nature of np.argmax
+    return text_lst
 
 
 def pass_to_llm(context_lst, query):
-    
-    
-    print("pass_to_llm")
     api_key = ""
     client = OpenAI(api_key=api_key)
     model_id = "gpt-3.5-turbo-1106"
     # gpt-4-1106-preview, gpt-3.5-turbo-1106
-
-
     prompt = f"According to the following information: {context_lst}\nAnswer the following question: {query}"
-    
     messages = [
             {"role": "user", "content": prompt}
         ]
-    
     completion = client.chat.completions.create(
     model=model_id,
     messages=messages,
     )
-    
-    
     response = completion.choices[0].message.content
     return response
 
 
 def main(query, n):
-    
     #embed query
     embedded_query = embed(query) 
     
@@ -182,9 +157,7 @@ def main(query, n):
     return answer
 
 if __name__ == "__main__":
-    
     n = 3
-    
     # Function to update the conversation
     def send():
         prompt = entry.get("1.0", 'end-1c')
