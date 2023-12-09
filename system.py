@@ -169,7 +169,7 @@ def main(query, n):
 
     start = time.time()
     # top n docs based on query
-    context_lst = get_top_n_docs(embedded_query, n, "C:/Users/ee527/Desktop/testing")
+    context_lst = get_top_n_docs(embedded_query, n, "./data/embedded/")
 
     # pass query and chunked docs to llm fn - done / Eric's is integrated
     answer = pass_to_llm(context_lst, query)
