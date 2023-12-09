@@ -102,7 +102,11 @@ def embed_folder(dir_path, output_path):
 
 
 def find_similarity(embed_query, embed_doc):
+    
+
     sim = cos_sim(embed_query, embed_doc).item()
+    
+  
     return sim
 
     similarities.sort(key=lambda x: x[1], reverse=True)
