@@ -61,7 +61,7 @@ with DAG(
             retries=3)
 
     transcribe_audio = BashOperator(
-            task_id='transcribe_audio',
+            task_id='transcribe_chunk_embed_audio',
             bash_command='python /home/kj2546/airflow/dags/ci_transcribe.py',
             retries=3
         )

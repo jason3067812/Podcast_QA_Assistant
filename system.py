@@ -15,7 +15,7 @@ from PIL import Image, ImageTk
 
 
 BUCKET_NAME = 'base_data_podcaster'
-CHUNKED_FOLDER = 'chunked/' + 'beyond_the_screenplay/' # TODO: REMOVE this extra beyond_the_screenplay once collapse all files into top level folder
+CHUNKED_FOLDER = 'chunked/'
 EMBEDDED_FOLDER = 'embedded/'
 ACCT_JSON_NAME = 'eecs6893-399001-57f9d9302900'
 TESTING = 'smoll/'
