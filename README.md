@@ -13,8 +13,6 @@ This is the final project for EECS 6893 Big Data Analytics
 - [x] add overlap_size to chunk_file fn
 - [ ] run experiments for chunk_size (number of sentences in chunk)
 - [ ] run experiments for overlap_size (how much overlap should there be per chunk)
-- [ ] run epxeriments to find best model for embedding (maybe)
-- [ ] run experiments for best similarity score
 - [ ] make deck
 - [ ] practice presentaiton
 - [ ] record presentation
