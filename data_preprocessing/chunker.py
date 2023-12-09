@@ -3,12 +3,17 @@ import spacy
 import os
 import sys
 import pickle
+import numpy as np
+from sentence_transformers import SentenceTransformer
+from sentence_transformers.util import cos_sim
 
 nltk.download('punkt')
 spacy.prefer_gpu()
 
 SPACY = 'spacy'
 SPACY_MODEL = "en_core_web_lg"
+SPACY_EMBED_MODEL = 'en_core_web_trf'
+SENTENCE_TRANSFORMER_MODEL = 'all-MiniLM-L6-v2'
 NLTK = 'nltk'
 FOLDER = 'folder'
 FILE = 'file'
@@ -65,22 +70,19 @@ def chunk_folder(dir_path, output_path, method=SPACY, chunk_size = 100, overlap_
 
 
 # embeddings below
-def embed(text, nlp):
-    doc = nlp(text)
-    embedding = doc.vector
-    return embedding
+def embed(text_lst, model=None):
+    if model is None:
+        model = SentenceTransformer(SENTENCE_TRANSFORMER_MODEL)
+    return np.mean(model.encode(text_lst), axis=0)
+    
     
 def embed_file(file_path, output_path):
+    model = SentenceTransformer(SENTENCE_TRANSFORMER_MODEL)
     file_name_without_extension, file_extension = os.path.splitext(os.path.basename(file_path))
-    nlp = spacy.load('en_core_web_lg')
 
     with open(file_path, 'r') as file:
-        text = file.read()
-    
-    embedding = embed(text, nlp)
-
-    # doc = nlp(text)
-    # embedding = doc.vector
+        text_lst = file.read().split('\n')
+    embedding = embed(text_lst, model)
 
     filename =  f"{file_name_without_extension}_embedded_.pkl"
     output_filename = output_path + "/" + filename
@@ -91,27 +93,41 @@ def embed_file(file_path, output_path):
 
 def embed_folder(dir_path, output_path):
      for root, dirs, files in os.walk(dir_path):
-        for filename in files:
+        print(len(files))
+        for i, filename in enumerate(files):
+            if i%50 == 0:
+                print(i)
             file_path = os.path.join(root, filename)
             embed_file(file_path, output_path)
 
 
+def find_similarity(embed_query, embed_doc):
+    
+
+    sim = cos_sim(embed_query, embed_doc).item()
+    
+  
+    return sim
+
+    similarities.sort(key=lambda x: x[1], reverse=True)
+    filenames, sim_scores = zip(*similarities[:n])
+
+    print(filenames)
+    print(sim_scores)
+
+    return list(sim_scores), list(filenames)
+
+   
+
 
 if __name__ == '__main__':
-    
-    
-    overlap_size, chunk_size, method, dir_path, output_path, to_chunk  = sys.argv[1:]
-    # overlap_size = 50, chunk_size = 100, SPACY, './input', './chunked_out', FOLDER
-    
-    # overlap_size = 50
-    # chunk_size = 100
-    # method = SPACY
-    # to_chunk = FOLDER
-    # dir_path = "D:/GitHub/Podcast_QA_Assistant/full"
-    # output_path = "D:/GitHub/Podcast_QA_Assistant/output"
-    
-    
-    if to_chunk == FOLDER:
-        chunk_folder(dir_path, output_path, method, chunk_size, overlap_size)
-    else:
-        chunk_file(dir_path, output_path, method, chunk_size, overlap_size)    
+    #overlap_size, chunk_size, method, dir_path, output_path, to_chunk  = sys.argv[1:]
+    # dir_path, output_path = sys.argv[1:]
+    dir_path = './chunked_out/chunk_size_100-overlapped_size_50/'
+    output_path = './embedded_out/chunk_size_100-overlapped_size_50'
+    embed_folder(dir_path, output_path)
+
+    # if to_chunk == FOLDER:
+    #     chunk_folder(dir_path, output_path, method, chunk_size, overlap_size)
+    # else:
+    #     chunk_file(dir_path, output_path, method, chunk_size, overlap_size)  
