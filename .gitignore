@@ -4,3 +4,6 @@ input/
 *.json
 private_consts.py
 embedded_out/
+data/chunked/*
+data/embedded/*
+data/raw/*
