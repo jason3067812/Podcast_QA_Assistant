@@ -30,7 +30,7 @@ def _get_fname_from_blob(blob):
     return blob.name.split('/')[-1].split('.')[0]
 
 def fetch_pkl_content_from_gcs():
-    print("fetch_pkl_content_from_gcs")
+
     blobs = _get_blobs_from_gcs(TESTING + EMBEDDED_FOLDER)
     vector_lst = []
     fname_lst = []
@@ -44,7 +44,7 @@ def fetch_pkl_content_from_gcs():
 
 
 def fetch_txt_content_from_gcs(lst_to_return=None):
-    print("fetch_txt_content_from_gcs")
+
     blobs = _get_blobs_from_gcs(TESTING + CHUNKED_FOLDER)
     text_lst = []
     fname_lst = []
@@ -73,17 +73,19 @@ def fetch_pkl_content_from_local_folder(local_folder_path):
     return vector_lst, fname_lst
 
 
-def fetch_txt_content_from_local_folder(local_txt, lst_to_return=None):
+def fetch_txt_content_from_local_folder(local_folder_path, lst_to_return=None):
     
     print(lst_to_return)
     
+   
     fname_lst = []
     final_text = "Read the following seperate documents first:\n"
     count = 0
 
     # Check all files in the specified local folder
-    for fname in os.listdir(local_txt):
+    for fname in os.listdir(local_folder_path):
 
+        
         if fname.endswith('.txt'):
             f = fname.split('.', 1)[0]
 
@@ -94,20 +96,27 @@ def fetch_txt_content_from_local_folder(local_txt, lst_to_return=None):
                 final_text = final_text + f"\ndocument {count}:\n"
              
                 fname_lst.append(fname)
-                with open(os.path.join(local_txt, fname), 'r', encoding="utf-8") as file:
+                with open(os.path.join(local_folder_path, fname), 'r', encoding="utf-8") as file:
                     sentence = file.read()
                         
                     final_text = final_text + sentence
+             
+                # with open("C:/Users/ee527/Desktop/out.txt", "w") as file:
+                  
+                #     text_to_write = final_text
                     
+                #     file.write(text_to_write)
+                    
+    
+
     return final_text, fname_lst
 
 
-def get_top_n_docs(embedded_query, n, local_embedded, local_txt):
-    
-    if len(local_embedded) == 0:
+def get_top_n_docs(embedded_query, n, local_embedded_path = "", local_txt_path = ""):
+    if len(local_embedded_path) == 0:
         embedded_docs, fname_lst = fetch_pkl_content_from_gcs()
     else:
-        embedded_docs, fname_lst = fetch_pkl_content_from_local_folder(local_embedded)
+        embedded_docs, fname_lst = fetch_pkl_content_from_local_folder(local_embedded_path)
     
     # calc cosine distance
     similarity_scores = []
@@ -116,16 +125,18 @@ def get_top_n_docs(embedded_query, n, local_embedded, local_txt):
     idx_of_top_n_docs = np.argsort(similarity_scores)[::-1][:n]
     fname_of_chunks_to_fetch = [ fname_lst[x].replace('_embedded_.pkl', '') for x in idx_of_top_n_docs]
 
-    if len(local_txt) == 0:
+    if len(local_txt_path) == 0:
         text_lst, _ = fetch_txt_content_from_gcs(fname_of_chunks_to_fetch)
     else:
-        text_lst, _ = fetch_txt_content_from_local_folder(local_txt, lst_to_return=fname_of_chunks_to_fetch)
+        text_lst, _ = fetch_txt_content_from_local_folder(local_txt_path, lst_to_return=fname_of_chunks_to_fetch)
         
     return text_lst
 
 
-def pass_to_llm(context, query, n, api_key):
+def pass_to_llm(context, query, n):
+   
     
+    api_key = ""
     client = OpenAI(api_key=api_key)
     model_id = "gpt-3.5-turbo-1106"
     # gpt-4-1106-preview, gpt-3.5-turbo-1106
@@ -144,86 +155,99 @@ def pass_to_llm(context, query, n, api_key):
     return response
 
 
-def infer(query, n, embedded_path, txt_path, api_key):
+def main(query, n, embedded_path, txt_path):
     
     #embed query
     embedded_query = embed(query) 
+    
 
     start = time.time()
     # top n docs based on query
-    context_lst = get_top_n_docs(embedded_query, n, embedded_path, txt_path)
+    context = get_top_n_docs(embedded_query, n, embedded_path, txt_path)
 
     # pass query and chunked docs to llm fn - done / Eric's is integrated
-    answer = pass_to_llm(context_lst, query, n, api_key)
+    answer = pass_to_llm(context, query, n)
     
     end = time.time()
     
     print(f"cost time: {end-start}")
 
+    # return output
     return answer
+
 
 if __name__ == "__main__":
     
-    print("system start!")
-    with open("key.txt", 'r', encoding='utf-8') as file:
-        api_key = file.readline()
+    
+    level1 = ["What is one reason to use long scense with few cuts?","Did Mr. Trump sexually abuse Ms. Carroll?", "When did President Dwight D. Eisenhower hosted British Prime Minister Winston Churchill at the White House?"]
+    level2 = ["What is a disadvantage of killing your main protagonist early in the film?", "Who thought the law didn't apply to him, and famously said that he could shoot someone in Fifth Avenue in your city of New York?", "Who first discovered gold on January 24, 1848, and where?"]
+    level3 = ["Why was inside out able to pull at your heartstrings?", "How tall is Donald Trump?", "When did Boris Johnson serve as US president?"]
+    
+    
+    if (len(level1) == len(level2)) and (len(level1) == len(level3)):
+        print("testing data pass: ", len(level1))
         
-    print(api_key)
+    
+    n_list = [8]
+
+    
+    embedded_data_path = "C:/Users/ee527/Downloads/embedded/medium_chunk"  
+    txt_data_path = "C:/Users/ee527/Downloads/text/medium_chunk"          
+    
+    for fname in os.listdir(embedded_data_path):
         
-    n = 20
-    # Function to update the conversation
-    def send():
-        prompt = entry.get("1.0", 'end-1c')
+        print("")
+        print(f"now testing dataset: {fname} ==================================================================================================================")
+        print("")
+        
+    
+        for n in n_list:
+            
+            print("top n = ", n)
+            print("")
+
+            print("*********************** level 1 question ***********************\n")
+            for prompt in level1:
+                
+                
+                
+                response = main([prompt],n, embedded_data_path+"/"+fname, txt_data_path+"/"+fname)
+                
+
+                print("")
+                print("A:")
+                print(response)
+                print("")
+              
+            print("*********************** level 2 question ***********************\n")  
+            for prompt in level2:
+                
+                
+                
+                response = main([prompt], n, embedded_data_path+"/"+fname, txt_data_path+"/"+fname)
+           
+                print("")
+                print("A:")
+                print(response)
+                print("")
+            
+            print("*********************** level 3 question ***********************\n")
+            for prompt in level3:
+                
+                
+                
+                response = main([prompt], n, embedded_data_path+"/"+fname, txt_data_path+"/"+fname)
+                
+      
+                print("")
+                print("A:")
+                print(response)
+                print("")
+                
        
-        response = infer([prompt],n,"./data/embedded/", "./data/text/", api_key)
-        conversation.insert(tk.END, "\n\nUser:\n" + prompt + "\n\nPodcastGPT:\n" + response)
-        entry.delete("1.0", tk.END)
-        
-    def clear():
-        conversation.delete("1.0", tk.END)
-        
-    # Set up the window
-    root = tk.Tk()
-    root.title("What the Pod?")
-
-    # Create a frame for conversation history and scrollbar
-    frame = tk.Frame(root)
-    frame.pack()
-
-    # Create conversation history textbox
-    conversation = tk.Text(frame, height=20, width=50)
-    conversation.pack(side=tk.LEFT, fill=tk.Y)
-
-    # Create a Scrollbar and attach it to conversation history
-    scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL, command=conversation.yview)
-    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-    conversation.config(yscrollcommand=scrollbar.set)
-
-    # Create a prompt entry textbox
-    entry = tk.Text(root, height=5, width=50)
-    entry.pack()
-
-    # Create a Send button
-    send_button = tk.Button(root, text="Send", command=send)
-    send_button.pack()
     
-    # Create a Clear button
-    clear_button = tk.Button(root, text="Clear", command=clear)
-    clear_button.pack()
-
-    # Create a photoimage object of the image in the path
-    icon_path = os.path.join("icon", "listenotes.png")
-    print(icon_path)
-    image1 = Image.open(icon_path)
-    test = ImageTk.PhotoImage(image1)
-    label1 = tk.Label(image=test)
-    label1.image = test
-    # Position image
-    label1.place(x=1, y=1)
-
-    # Run the application
-    root.mainloop()
     
+        
     
     
 
