@@ -133,10 +133,10 @@ def get_top_n_docs(embedded_query, n, local_embedded_path = "", local_txt_path =
     return text_lst
 
 
-def pass_to_llm(context, query, n):
+def pass_to_llm(context, query, n, api_key):
    
     
-    api_key = ""
+    api_key = api_key
     client = OpenAI(api_key=api_key)
     model_id = "gpt-3.5-turbo-1106"
     # gpt-4-1106-preview, gpt-3.5-turbo-1106
@@ -155,18 +155,18 @@ def pass_to_llm(context, query, n):
     return response
 
 
-def main(query, n, embedded_path, txt_path):
+def main(query, n, embedded_path, txt_path, api_key):
     
     #embed query
     embedded_query = embed(query) 
     
-
     start = time.time()
+    
     # top n docs based on query
     context = get_top_n_docs(embedded_query, n, embedded_path, txt_path)
 
     # pass query and chunked docs to llm fn - done / Eric's is integrated
-    answer = pass_to_llm(context, query, n)
+    answer = pass_to_llm(context, query, n, api_key)
     
     end = time.time()
     
@@ -179,6 +179,7 @@ def main(query, n, embedded_path, txt_path):
 if __name__ == "__main__":
     
     
+    # standardized question
     level1 = ["What is one reason to use long scense with few cuts?","Did Mr. Trump sexually abuse Ms. Carroll?", "When did President Dwight D. Eisenhower hosted British Prime Minister Winston Churchill at the White House?"]
     level2 = ["What is a disadvantage of killing your main protagonist early in the film?", "Who thought the law didn't apply to him, and famously said that he could shoot someone in Fifth Avenue in your city of New York?", "Who first discovered gold on January 24, 1848, and where?"]
     level3 = ["Why was inside out able to pull at your heartstrings?", "How tall is Donald Trump?", "When did Boris Johnson serve as US president?"]
@@ -187,12 +188,12 @@ if __name__ == "__main__":
     if (len(level1) == len(level2)) and (len(level1) == len(level3)):
         print("testing data pass: ", len(level1))
         
-    
-    n_list = [8]
+    # top n parameter    
+    n_list = [20]
 
-    
-    embedded_data_path = "C:/Users/ee527/Downloads/embedded/medium_chunk"  
-    txt_data_path = "C:/Users/ee527/Downloads/text/medium_chunk"          
+    # input testing data
+    embedded_data_path = "C:/Users/ee527/Downloads/embedded/nano_chunk"  
+    txt_data_path = "C:/Users/ee527/Downloads/text/nano_chunk"          
     
     for fname in os.listdir(embedded_data_path):
         
@@ -200,7 +201,6 @@ if __name__ == "__main__":
         print(f"now testing dataset: {fname} ==================================================================================================================")
         print("")
         
-    
         for n in n_list:
             
             print("top n = ", n)
@@ -209,11 +209,8 @@ if __name__ == "__main__":
             print("*********************** level 1 question ***********************\n")
             for prompt in level1:
                 
-                
-                
                 response = main([prompt],n, embedded_data_path+"/"+fname, txt_data_path+"/"+fname)
-                
-
+            
                 print("")
                 print("A:")
                 print(response)
@@ -222,10 +219,8 @@ if __name__ == "__main__":
             print("*********************** level 2 question ***********************\n")  
             for prompt in level2:
                 
-                
-                
                 response = main([prompt], n, embedded_data_path+"/"+fname, txt_data_path+"/"+fname)
-           
+    
                 print("")
                 print("A:")
                 print(response)
@@ -234,20 +229,9 @@ if __name__ == "__main__":
             print("*********************** level 3 question ***********************\n")
             for prompt in level3:
                 
-                
-                
                 response = main([prompt], n, embedded_data_path+"/"+fname, txt_data_path+"/"+fname)
-                
-      
+            
                 print("")
                 print("A:")
                 print(response)
                 print("")
-                
-       
-    
-    
-        
-    
-    
-

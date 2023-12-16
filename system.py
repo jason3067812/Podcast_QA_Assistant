@@ -98,7 +98,7 @@ def fetch_txt_content_from_local_folder(local_txt, lst_to_return=None):
                     sentence = file.read()
                         
                     final_text = final_text + sentence
-                    
+                
     return final_text, fname_lst
 
 
@@ -119,7 +119,7 @@ def get_top_n_docs(embedded_query, n, local_embedded, local_txt):
     if len(local_txt) == 0:
         text_lst, _ = fetch_txt_content_from_gcs(fname_of_chunks_to_fetch)
     else:
-        text_lst, _ = fetch_txt_content_from_local_folder(local_txt, lst_to_return=fname_of_chunks_to_fetch)
+        text_lst, fname_lst = fetch_txt_content_from_local_folder(local_txt, lst_to_return=fname_of_chunks_to_fetch)
         
     return text_lst
 
@@ -136,7 +136,7 @@ def pass_to_llm(context, query, n, api_key):
     completion = client.chat.completions.create(
     model=model_id,
     messages=messages,
-    temperature = 0,
+    temperature = 0.5,
     seed = 1,
     )
     
@@ -165,23 +165,42 @@ def infer(query, n, embedded_path, txt_path, api_key):
 if __name__ == "__main__":
     
     print("system start!")
+    
+    # system initial
+    
+    # get gpt api key
     with open("key.txt", 'r', encoding='utf-8') as file:
         api_key = file.readline()
         
-    print(api_key)
-        
+    # specify your top n parameter (n * chunk size cannot exceed 400 due to gpt3.5 token limitation) 
     n = 20
+    
+    # tkinter UI stuffs ============================================================================
     # Function to update the conversation
+    first_interaction = True
     def send():
+        
         prompt = entry.get("1.0", 'end-1c')
-       
-        response = infer([prompt],n,"./data/embedded/", "./data/text/", api_key)
+        
+        selected_mode = mode_var.get()
+        
+        if selected_mode == "a":
+            embedded_path = "./data/embedded/Screeplay/"
+            text_path = "./data/text/Screeplay/"
+        elif selected_mode == "b":
+            embedded_path = "./data/embedded/DT/"
+            text_path = "./data/text/DT/"
+        elif selected_mode == "c":
+            embedded_path = "./data/embedded/History/"
+            text_path = "./data/text/History/"
+      
+        response = infer([prompt], n, embedded_path, text_path, api_key)
         conversation.insert(tk.END, "\n\nUser:\n" + prompt + "\n\nPodcastGPT:\n" + response)
         entry.delete("1.0", tk.END)
-        
+
     def clear():
         conversation.delete("1.0", tk.END)
-        
+            
     # Set up the window
     root = tk.Tk()
     root.title("What the Pod?")
@@ -193,27 +212,41 @@ if __name__ == "__main__":
     # Create conversation history textbox
     conversation = tk.Text(frame, height=20, width=50)
     conversation.pack(side=tk.LEFT, fill=tk.Y)
-
+    conversation.insert(tk.END, "Welcome to What the Pod ! Please wait for system initialization each time you choose a new podcast.\n")
+    
     # Create a Scrollbar and attach it to conversation history
     scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL, command=conversation.yview)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     conversation.config(yscrollcommand=scrollbar.set)
 
     # Create a prompt entry textbox
-    entry = tk.Text(root, height=5, width=50)
-    entry.pack()
+    entry = tk.Text(root, height=5, width=70)
+    entry.pack(pady=10)
 
     # Create a Send button
     send_button = tk.Button(root, text="Send", command=send)
     send_button.pack()
-    
+
     # Create a Clear button
     clear_button = tk.Button(root, text="Clear", command=clear)
-    clear_button.pack()
+    clear_button.pack(pady=10)
+
+    # Create a label and radio buttons for selecting mode
+    mode_var = tk.StringVar()
+    mode_label = tk.Label(root, text="Choose one podcast you are interested in:")
+    mode_label.pack(pady=10)
+
+    mode_a_button = tk.Radiobutton(root, text="Beyond The Screenplay", variable=mode_var, value="a")
+    mode_a_button.pack()
+
+    mode_b_button = tk.Radiobutton(root, text="Prosecuting Donald Trump", variable=mode_var, value="b")
+    mode_b_button.pack()
+
+    mode_c_button = tk.Radiobutton(root, text="American History Hit", variable=mode_var, value="c")
+    mode_c_button.pack()
 
     # Create a photoimage object of the image in the path
     icon_path = os.path.join("icon", "listenotes.png")
-    print(icon_path)
     image1 = Image.open(icon_path)
     test = ImageTk.PhotoImage(image1)
     label1 = tk.Label(image=test)
@@ -223,7 +256,3 @@ if __name__ == "__main__":
 
     # Run the application
     root.mainloop()
-    
-    
-    
-
