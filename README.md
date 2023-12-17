@@ -17,7 +17,14 @@ This is the final project for EECS 6893 Big Data Analytics
 - [ ] practice presentaiton
 - [ ] record presentation
 
-## Code introduction
+## Installation Instructions
+To begin, first install all dependencies by running
+``` pip install -r requirements.txt```
+
+Next, run the following commands to install the necessary spaCy models
+``` python -m spacy download en_core_web_sm```
+```python -m spacy download en_core_web_lg```
+```python -m spacy download en_core_web_trf```
 
 1. install all dependencies in requirements.txt.<br>
 2. download all data from: https://drive.google.com/drive/folders/1HnAgR-6ecyo-7LBPSX1K46NLuAIR2WFI?usp=sharing<br>
