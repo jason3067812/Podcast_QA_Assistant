@@ -7,9 +7,11 @@ To begin, first install all dependencies by running
 ``` pip install -r requirements.txt```
 
 Next, run the following commands to install the necessary spaCy models
-``` python -m spacy download en_core_web_sm```
-```python -m spacy download en_core_web_lg```
-```python -m spacy download en_core_web_trf```
+``` python -m spacy download en_core_web_sm``` </br>
+```python -m spacy download en_core_web_lg``` </br>
+```python -m spacy download en_core_web_trf```</br>
+
+To launch the system, do ```python system.py``` in your terminal. A GUI should appear and you can begin interacting with the chatbot.
 
 1. install all dependencies in requirements.txt.<br>
 2. download all data from: https://drive.google.com/drive/folders/1HnAgR-6ecyo-7LBPSX1K46NLuAIR2WFI?usp=sharing<br>
