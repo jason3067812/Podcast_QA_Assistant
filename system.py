@@ -30,7 +30,6 @@ def _get_fname_from_blob(blob):
     return blob.name.split('/')[-1].split('.')[0]
 
 def fetch_pkl_content_from_gcs():
-    print("fetch_pkl_content_from_gcs")
     blobs = _get_blobs_from_gcs(TESTING + EMBEDDED_FOLDER)
     vector_lst = []
     fname_lst = []
@@ -44,88 +43,73 @@ def fetch_pkl_content_from_gcs():
 
 
 def fetch_txt_content_from_gcs(lst_to_return=None):
-    print("fetch_txt_content_from_gcs")
     blobs = _get_blobs_from_gcs(TESTING + CHUNKED_FOLDER)
-    text_lst = []
+    final_text = "Read the following seperate documents first:\n"
+    count = 0
     fname_lst = []
     for blob in blobs:
         if '.txt' in blob.name:
             fname = _get_fname_from_blob(blob)
+            
             if lst_to_return is None or fname in lst_to_return:
                 fname_lst.append(fname)
                 text = blob.download_as_string().decode('ASCII')
-                text_lst.append(text)
-    return text_lst, fname_lst
+                count+=1
+                # chunk fushion here
+                final_text = final_text + f"\ndocument {count}:\n"
+    return final_text, fname_lst
 
 
 def fetch_pkl_content_from_local_folder(local_folder_path):
- 
     vector_lst = []
     fname_lst = []
-
     # Check all files in the specified local folder
     for fname in os.listdir(local_folder_path):
         if fname.endswith('.pkl'):
             fname_lst.append(fname)
             with open(os.path.join(local_folder_path, fname), 'rb') as file:
                 vector_lst.append(pickle.load(file))
-
     return vector_lst, fname_lst
 
 
 def fetch_txt_content_from_local_folder(local_txt, lst_to_return=None):
-    
-    print(lst_to_return)
-    
     fname_lst = []
     final_text = "Read the following seperate documents first:\n"
     count = 0
-
     # Check all files in the specified local folder
     for fname in os.listdir(local_txt):
-
         if fname.endswith('.txt'):
             f = fname.split('.', 1)[0]
-
             if lst_to_return is None or f in lst_to_return:
-                
                 count+=1
-                
                 final_text = final_text + f"\ndocument {count}:\n"
-             
                 fname_lst.append(fname)
                 with open(os.path.join(local_txt, fname), 'r', encoding="utf-8") as file:
                     sentence = file.read()
-                        
                     final_text = final_text + sentence
                 
     return final_text, fname_lst
 
 
 def get_top_n_docs(embedded_query, n, local_embedded, local_txt):
-    
     if len(local_embedded) == 0:
         embedded_docs, fname_lst = fetch_pkl_content_from_gcs()
     else:
         embedded_docs, fname_lst = fetch_pkl_content_from_local_folder(local_embedded)
-    
     # calc cosine distance
     similarity_scores = []
     for embed_doc in embedded_docs:
         similarity_scores.append(find_similarity(embedded_query, embed_doc))
     idx_of_top_n_docs = np.argsort(similarity_scores)[::-1][:n]
     fname_of_chunks_to_fetch = [ fname_lst[x].replace('_embedded_.pkl', '') for x in idx_of_top_n_docs]
-
     if len(local_txt) == 0:
         text_lst, _ = fetch_txt_content_from_gcs(fname_of_chunks_to_fetch)
     else:
         text_lst, fname_lst = fetch_txt_content_from_local_folder(local_txt, lst_to_return=fname_of_chunks_to_fetch)
-        
     return text_lst
 
 
 def pass_to_llm(context, query, n, api_key):
-    
     client = OpenAI(api_key=api_key)
     model_id = "gpt-3.5-turbo-1106"
     # gpt-4-1106-preview, gpt-3.5-turbo-1106
@@ -138,52 +122,38 @@ def pass_to_llm(context, query, n, api_key):
     messages=messages,
     temperature = 0.5,
     seed = 1,
-    )
-    
+    ) 
     response = completion.choices[0].message.content
     return response
 
 
 def infer(query, n, embedded_path, txt_path, api_key):
-    
     #embed query
     embedded_query = embed(query) 
-
     start = time.time()
     # top n docs based on query
     context_lst = get_top_n_docs(embedded_query, n, embedded_path, txt_path)
-
     # pass query and chunked docs to llm fn - done / Eric's is integrated
     answer = pass_to_llm(context_lst, query, n, api_key)
-    
     end = time.time()
-    
     print(f"cost time: {end-start}")
-
     return answer
 
 if __name__ == "__main__":
     
     print("system start!")
-    
     # system initial
-    
     # get gpt api key
     with open("key.txt", 'r', encoding='utf-8') as file:
         api_key = file.readline()
-        
     # specify your top n parameter (n * chunk size cannot exceed 400 due to gpt3.5 token limitation) 
     n = 20
-    
     # tkinter UI stuffs ============================================================================
     # Function to update the conversation
     first_interaction = True
     def send():
-        
         prompt = entry.get("1.0", 'end-1c')
-        
         selected_mode = mode_var.get()
-        
         if selected_mode == "a":
             embedded_path = "./data/embedded/Screeplay/"
             text_path = "./data/text/Screeplay/"
@@ -193,18 +163,16 @@ if __name__ == "__main__":
         elif selected_mode == "c":
             embedded_path = "./data/embedded/History/"
             text_path = "./data/text/History/"
-      
         response = infer([prompt], n, embedded_path, text_path, api_key)
         conversation.insert(tk.END, "\n\nUser:\n" + prompt + "\n\nPodcastGPT:\n" + response)
         entry.delete("1.0", tk.END)
-
     def clear():
-        conversation.delete("1.0", tk.END)
-            
+        conversation.delete("1.0", tk.END) 
+        
     # Set up the window
     root = tk.Tk()
     root.title("What the Pod?")
-
+    
     # Create a frame for conversation history and scrollbar
     frame = tk.Frame(root)
     frame.pack()
