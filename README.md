@@ -17,6 +17,14 @@ This is the final project for EECS 6893 Big Data Analytics
 - [ ] practice presentaiton
 - [ ] record presentation
 
+## Code introduction
+
+1. install all dependencies in requirements.txt.<br>
+2. download all data from: https://drive.google.com/drive/folders/1HnAgR-6ecyo-7LBPSX1K46NLuAIR2WFI?usp=sharing<br>
+3. unzip data file and put it in the same location with system.py<br>
+4. use eval.py to evaluate the output of gpt.<br>
+5. use system.py to run the system and generate the user interface.<br>
+
 
 
 ## Author
