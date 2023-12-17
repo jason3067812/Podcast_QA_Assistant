@@ -2,21 +2,6 @@
 
 This is the final project for EECS 6893 Big Data Analytics
 
-## Todos
-- [x] finish embedding using transformers
-- [x] modularize the embeddings 
-- [x] get top n most similar documents to query
-- [x] prompt engineering for gpt
-- [x] system file (integration of parts) (majority is there; Ziyao to complete get_top_n_docs)
-- [x] add embedding to airflow pipeline
-- [x] UI system (make sure to include listennotes logo onto the api) (https://python.plainenglish.io/building-a-chatbot-with-django-and-chatgpt-9c0fdee2b162)
-- [x] add overlap_size to chunk_file fn
-- [ ] run experiments for chunk_size (number of sentences in chunk)
-- [ ] run experiments for overlap_size (how much overlap should there be per chunk)
-- [ ] make deck
-- [ ] practice presentaiton
-- [ ] record presentation
-
 ## Installation Instructions
 To begin, first install all dependencies by running
 ``` pip install -r requirements.txt```
