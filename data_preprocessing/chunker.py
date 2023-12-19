@@ -53,7 +53,6 @@ def _save_chunked_file(chunk, filename, output_path, i):
 
 def chunk_file(file_path, output_path, method=SPACY, chunk_size = 100, overlap_size = 50):
     file_name_without_extension, file_extension = os.path.splitext(os.path.basename(file_path))
-    print(file_path)
     with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read()
     chunks, chuncks_length = chunker(content, chunk_size, overlap_size, method)
@@ -93,7 +92,6 @@ def embed_file(file_path, output_path):
 
 def embed_folder(dir_path, output_path):
      for root, dirs, files in os.walk(dir_path):
-        print(len(files))
         for i, filename in enumerate(files):
             if i%50 == 0:
                 print(i)
@@ -102,32 +100,14 @@ def embed_folder(dir_path, output_path):
 
 
 def find_similarity(embed_query, embed_doc):
-    
-
     sim = cos_sim(embed_query, embed_doc).item()
-    
-  
     return sim
-
-    similarities.sort(key=lambda x: x[1], reverse=True)
-    filenames, sim_scores = zip(*similarities[:n])
-
-    print(filenames)
-    print(sim_scores)
-
-    return list(sim_scores), list(filenames)
 
    
 
 
 if __name__ == '__main__':
-    #overlap_size, chunk_size, method, dir_path, output_path, to_chunk  = sys.argv[1:]
-    # dir_path, output_path = sys.argv[1:]
     dir_path = './chunked_out/chunk_size_100-overlapped_size_50/'
     output_path = './embedded_out/chunk_size_100-overlapped_size_50'
     embed_folder(dir_path, output_path)
 
-    # if to_chunk == FOLDER:
-    #     chunk_folder(dir_path, output_path, method, chunk_size, overlap_size)
-    # else:
-    #     chunk_file(dir_path, output_path, method, chunk_size, overlap_size)  

@@ -6,7 +6,7 @@ TRANSCRIBE_DIR = '/home/kj2546/airflow/transcribed/'
 CHUNK_DIR = '/home/kj2546/airflow/chunked/'
 EMBEDDED_DIR = '/home/kj2546/airflow/embedded/'
 
-API_KEY = '06673b55481c47c3ac5636b2eddff44d'# Erics #'bcb4b63d087f42b6942c85607dc2f711'
+API_KEY = ''
 
 PODCAST_ID_DIR = {
     'beyond_the_screenplay': 'f616d744c4ae4d4ba126711cac2fd4e2',

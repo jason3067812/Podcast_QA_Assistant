@@ -136,12 +136,9 @@ def infer(query, n, embedded_path, txt_path, api_key):
     # pass query and chunked docs to llm fn - done / Eric's is integrated
     answer = pass_to_llm(context_lst, query, n, api_key)
     end = time.time()
-    print(f"cost time: {end-start}")
     return answer
 
 if __name__ == "__main__":
-    
-    print("system start!")
     # system initial
     # get gpt api key
     with open("key.txt", 'r', encoding='utf-8') as file:

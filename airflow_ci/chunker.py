@@ -58,7 +58,6 @@ def _save_chunked_meta(file_name_without_extension, output_path, num_chunks):
 
 def chunk_file(file_path, output_path, method=SPACY, chunk_size = 100, overlap_size = 50):
     file_name_without_extension, file_extension = os.path.splitext(os.path.basename(file_path))
-    print(file_path)
     with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read()
     chunks, chuncks_length = chunker(content, chunk_size, overlap_size, method)
